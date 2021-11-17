@@ -19,14 +19,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+
         <activity
             android:name=".EditorActivity"
             android:exported="true"
             android:theme="@style/Theme.Cat_house.NoActionBar">
 
         </activity>
+        <provider
+            android:authorities="com.example.cat_house"
+            android:name=".data.GuestProvider"
+            android:exported="false"/>
     </application>
 
 </manifest>

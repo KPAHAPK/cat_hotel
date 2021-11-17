@@ -6,6 +6,9 @@ import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
+import android.util.Log
+import com.example.cat_house.data.HotelContract.GuestEntry
+
 
 class GuestProvider : ContentProvider() {
 
@@ -39,8 +42,7 @@ class GuestProvider : ContentProvider() {
 
         val cursor: Cursor
 
-        val match = uriMatcher.match(uri)
-        when (match) {
+        when (uriMatcher.match(uri)) {
             GUESTS -> {
                 cursor = database.query(HotelContract.GuestEntry.TABLE_NAME,
                         projection,
@@ -84,11 +86,32 @@ class GuestProvider : ContentProvider() {
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        TODO("Not yet implemented")
+        return when (uriMatcher.match(uri)) {
+            GUESTS -> {
+                insertGuest(uri, values)
+            }
+            else -> {
+                throw java.lang.IllegalArgumentException("Insertion is not supported for $uri")
+            }
+        }
     }
 
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int {
-        TODO("Not yet implemented")
+        val database = dbHelper.writableDatabase
+
+        return when (uriMatcher.match(uri)) {
+            GUESTS -> {
+                database.delete(HotelContract.GuestEntry.TABLE_NAME, selection, selectionArgs)
+            }
+            GUEST_ID -> {
+                val mSelection = "${HotelContract.GuestEntry._ID} =?"
+                val mSelectionArgs = arrayOf((ContentUris.parseId(uri)).toString())
+                database.delete(HotelContract.GuestEntry.TABLE_NAME, mSelection, mSelectionArgs)
+            }
+            else -> {
+                throw java.lang.IllegalArgumentException("Deletion is not supported for $uri")
+            }
+        }
     }
 
     override fun update(
@@ -97,6 +120,91 @@ class GuestProvider : ContentProvider() {
             selection: String?,
             selectionArgs: Array<out String>?
     ): Int {
-        TODO("Not yet implemented")
+        return when (uriMatcher.match(uri)) {
+            GUESTS -> {
+                updateGuests(uri, values, selection, selectionArgs)
+            }
+            GUEST_ID -> {
+                val mSelection = "${HotelContract.GuestEntry._ID} =?"
+                val mSelectionArgs = arrayOf((ContentUris.parseId(uri)).toString())
+                updateGuests(uri, values, mSelection, mSelectionArgs)
+            }
+            else -> {
+                throw IllegalArgumentException("Update is not supported for " + uri)
+            }
+        }
+    }
+
+    private fun insertGuest(uri: Uri, values: ContentValues?): Uri? {
+        val name = values?.getAsString(GuestEntry.COLUMN_NAME)
+                ?: throw IllegalArgumentException("Guest requires a name")
+
+        val gender = values.getAsString(GuestEntry.COLUMN_GENDER)
+        if (gender == null || !GuestEntry.isValidGender(gender)) {
+            throw IllegalArgumentException("Guest requires valid gender")
+        }
+
+        val age = values.getAsInteger(GuestEntry.COLUMN_AGE)
+        if (age != null && age < 0) {
+            throw IllegalArgumentException("Guest requires valid gender")
+        }
+
+        val database = dbHelper.writableDatabase
+
+        val id = database.insert(GuestEntry.TABLE_NAME, null, values)
+
+        if (id == -1L) {
+            Log.e(TAG, "Failed to insert row for $uri")
+            return null
+        }
+
+        return ContentUris.withAppendedId(uri, id)
+    }
+
+    private fun updateGuests(
+            uri: Uri,
+            values: ContentValues?,
+            selection: String?,
+            selectionArgs: Array<out String>?
+    ): Int {
+
+        GuestEntry.apply {
+            COLUMN_NAME.also {
+                if (values?.containsKey(it) == true) {
+                    val name = values.getAsString(it)
+                            ?: throw IllegalArgumentException("Guests requires a name")
+                }
+            }
+
+            COLUMN_GENDER.also {
+                if (values?.containsKey(it) == true) {
+                    val gender = values.getAsString(it)
+                    if (gender == null || !GuestEntry.isValidGender(gender)) {
+                        throw IllegalArgumentException("Guest requires valid gender")
+                    }
+                }
+            }
+
+            COLUMN_AGE.also{
+                if (values?.containsKey(it) == true) {
+                    val age = values.getAsInteger(it)
+                    if (age != null && age < 0) {
+                        throw IllegalArgumentException("Guest requires valid gender")
+                    }
+                }
+            }
+        }
+
+        if (values?.size() == 0){
+            return 0
+        }
+
+        val database = dbHelper.writableDatabase
+
+        return  database.update(GuestEntry.TABLE_NAME, values, selection, selectionArgs)
+
+
+
+
     }
 }

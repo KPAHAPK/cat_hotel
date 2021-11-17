@@ -6,17 +6,17 @@ class HotelContract {
 
     open class GuestEntry : BaseColumns{
         companion object{
-            val TABLE_NAME = "guests"
+            const val TABLE_NAME = "guests"
 
-            val _ID = BaseColumns._ID
-            val COLUMN_NAME = "name"
-            val COLUMN_CITY = "city"
-            val COLUMN_GENDER = "gender"
-            val COLUMN_AGE = "age"
+            const val _ID = BaseColumns._ID
+            const val COLUMN_NAME = "name"
+            const val COLUMN_CITY = "city"
+            const val COLUMN_GENDER = "gender"
+            const val COLUMN_AGE = "age"
 
-            val GENDER_FEMALE = 0
-            val GENDER_MALE = 1
-            val GENDER_UNKNOWN = 2
+            const val GENDER_FEMALE = 0
+            const val GENDER_MALE = 1
+            const val GENDER_UNKNOWN = 2
         }
 
     }
