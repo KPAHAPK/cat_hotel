@@ -3,8 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.cat_house.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_insert_new_data"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/action_insert_new_data"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_insert_new_data_by_exec"
+        android:orderInCategory="100"
+        android:title="@string/action_insert_new_data_by_exec"
+        app:showAsAction="never"
+        />
+
+
 </menu>

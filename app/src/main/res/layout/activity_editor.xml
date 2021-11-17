@@ -86,4 +86,22 @@
 
         </RelativeLayout>
     </LinearLayout>
+
+    <Button
+        android:id="@+id/insert_guest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/insert_guest" />
+
+    <Button
+        android:id="@+id/update_guest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/update_guest" />
+
+    <Button
+        android:id="@+id/delete_guest"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/delete_guest" />
 </LinearLayout>

@@ -16,6 +16,11 @@
     <string name="gender_unknown">Неизвестно</string>
     <string name="gender_male">Кот</string>
     <string name="gender_female">Кошка</string>
+    <string name="action_insert_new_data">Insert cat</string>
+    <string name="action_insert_new_data_by_exec">InsertByExec</string>
+    <string name="insert_guest">Зарегестрировать гостя</string>
+    <string name="update_guest">Обновить гостя 3</string>
+    <string name="delete_guest">Удалить гостя</string>
 
     <string-array name="array_gender_options">
         <item>@string/gender_female</item>
