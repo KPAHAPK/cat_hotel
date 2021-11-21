@@ -44,7 +44,7 @@ class GuestProvider : ContentProvider() {
 
         when (uriMatcher.match(uri)) {
             GUESTS -> {
-                cursor = database.query(HotelContract.GuestEntry.TABLE_NAME,
+                cursor = database.query(GuestEntry.TABLE_NAME,
                         projection,
                         selection,
                         selectionArgs,
@@ -53,10 +53,10 @@ class GuestProvider : ContentProvider() {
                         sortOrder)
             }
             GUEST_ID -> {
-                val mSelection = "${HotelContract.GuestEntry._ID} =?"
+                val mSelection = "${GuestEntry._ID} =?"
                 val mSelectionArgs = arrayOf((ContentUris.parseId(uri)).toString())
 
-                cursor = database.query(HotelContract.GuestEntry.TABLE_NAME,
+                cursor = database.query(GuestEntry.TABLE_NAME,
                         projection,
                         mSelection,
                         mSelectionArgs,
@@ -68,21 +68,23 @@ class GuestProvider : ContentProvider() {
                 throw IllegalArgumentException("Cannot query unknown URI $uri")
             }
         }
+        cursor.setNotificationUri(context?.contentResolver, uri)
         return cursor
     }
 
     override fun getType(uri: Uri): String? {
-        return when (val match = uriMatcher.match(uri)) {
-            GUESTS -> {
-                HotelContract.GuestEntry.CONTENT_LIST_TYPE
-            }
-            GUEST_ID -> {
-                HotelContract.GuestEntry.CONTENT_ITEM_TYPE
-            }
-            else -> {
-                throw java.lang.IllegalArgumentException("Unknown URI $uri with match $match")
-            }
-        }
+        return "0"
+//        when (val match = uriMatcher.match(uri)) {
+//            GUESTS -> {
+//                HotelContract.GuestEntry.CONTENT_LIST_TYPE
+//            }
+//            GUEST_ID -> {
+//                HotelContract.GuestEntry.CONTENT_ITEM_TYPE
+//            }
+//            else -> {
+//                throw java.lang.IllegalArgumentException("Unknown URI $uri with match $match")
+//            }
+//        }
     }
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
@@ -140,7 +142,7 @@ class GuestProvider : ContentProvider() {
                 ?: throw IllegalArgumentException("Guest requires a name")
 
         val gender = values.getAsString(GuestEntry.COLUMN_GENDER)
-        if (gender == null || !GuestEntry.isValidGender(gender)) {
+        if (gender == null) {
             throw IllegalArgumentException("Guest requires valid gender")
         }
 
@@ -158,6 +160,7 @@ class GuestProvider : ContentProvider() {
             return null
         }
 
+        context?.contentResolver?.notifyChange(uri, null)
         return ContentUris.withAppendedId(uri, id)
     }
 
@@ -179,7 +182,7 @@ class GuestProvider : ContentProvider() {
             COLUMN_GENDER.also {
                 if (values?.containsKey(it) == true) {
                     val gender = values.getAsString(it)
-                    if (gender == null || !GuestEntry.isValidGender(gender)) {
+                    if (gender == null) {
                         throw IllegalArgumentException("Guest requires valid gender")
                     }
                 }

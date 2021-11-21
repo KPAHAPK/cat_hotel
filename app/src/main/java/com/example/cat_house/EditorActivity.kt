@@ -1,6 +1,8 @@
 package com.example.cat_house
 
 import android.content.ContentValues
+import android.database.Cursor
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
@@ -8,16 +10,20 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.loader.app.LoaderManager
+import androidx.loader.content.Loader
 import com.example.cat_house.data.HotelContract
 import com.example.cat_house.data.HotelDbHelper
 import com.example.cat_house.databinding.ActivityEditorBinding
 
-class EditorActivity : AppCompatActivity() {
+class EditorActivity : AppCompatActivity(), LoaderManager.LoaderCallbacks<Cursor> {
 
     companion object {
         var gender = 0
+        const val EXITING_GUEST_LOADER = 0
     }
 
+    private var mCurrentGuestUri: Uri? = null
     lateinit var binding: ActivityEditorBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,7 +31,16 @@ class EditorActivity : AppCompatActivity() {
         binding = ActivityEditorBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupSpinner();
+        setupSpinner()
+
+        val intent = intent
+        mCurrentGuestUri = intent.data
+
+        title = if (mCurrentGuestUri == null){
+            "Новый гость"
+        } else {
+            "Изменение данных"
+        }
 
         binding.insertGuest.setOnClickListener {
             insertGuest()
@@ -41,13 +56,18 @@ class EditorActivity : AppCompatActivity() {
             deleteGuest()
             finish()
         }
+
     }
 
     private fun deleteGuest() {
         val dbHelper = HotelDbHelper(this)
         val db = dbHelper.writableDatabase
 
-        db.delete(HotelContract.GuestEntry.TABLE_NAME, "${HotelContract.GuestEntry.COLUMN_NAME}= ?", arrayOf("wer"))
+        db.delete(
+            HotelContract.GuestEntry.TABLE_NAME,
+            "${HotelContract.GuestEntry.COLUMN_NAME}= ?",
+            arrayOf("wer")
+        )
     }
 
     private fun updateGuest() {
@@ -73,7 +93,6 @@ class EditorActivity : AppCompatActivity() {
         val city = binding.editGuestCity.text.toString().trim()
         val age = binding.editGuestAge.text.toString().trim().toInt()
 
-        val dbHelper = HotelDbHelper(this)
 
         val values = ContentValues()
         values.apply {
@@ -83,12 +102,11 @@ class EditorActivity : AppCompatActivity() {
             put(HotelContract.GuestEntry.COLUMN_AGE, age)
         }
 
-        val db = dbHelper.writableDatabase
 
-        val newRowId = db.insert(HotelContract.GuestEntry.TABLE_NAME, null, values)
+        val newUri = contentResolver.insert(HotelContract.CONTENT_URI, values)
 
-        when (newRowId) {
-            -1L -> {
+        when (newUri) {
+            null -> {
                 Toast.makeText(this, "Ошбика регистрации гостя", Toast.LENGTH_SHORT).show()
             }
             else -> {
@@ -133,5 +151,17 @@ class EditorActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> =
+        LoaderManager.getInstance(this).initLoader(EXITING_GUEST_LOADER, null, this)
+
+
+    override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
+
+    }
+
+    override fun onLoaderReset(loader: Loader<Cursor>) {
+        TODO("Not yet implemented")
     }
 }
